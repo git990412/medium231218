@@ -13,10 +13,8 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
 
 @Component
-@Slf4j
 public class JwtUtils {
     @Value("${jwt.expiration}")
     private int jwtExpirationMs;
@@ -39,19 +37,19 @@ public class JwtUtils {
 
     public Cookie generateJwtCookie(String username) {
         String jwt = generateTokenFromUsername(username);
-        return generateCookie(jwtCookie, jwt, "/api", 24 * 60 * 60 * 1000);
+        return generateCookie(jwtCookie, jwt, "/api");
     }
 
-    private Cookie generateCookie(String name, String value, String path, int Age) {
+    private Cookie generateCookie(String name, String value, String path) {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath(path);
-        cookie.setMaxAge(Age);
+        cookie.setMaxAge(1209600000);
         cookie.setHttpOnly(true);
         return cookie;
     }
 
     public Cookie generateRefreshJwtCookie(String refreshToken) {
-        return generateCookie(jwtRefreshCookie, refreshToken, "/api/v1/members/refreshtoken", refreshExpirationMs);
+        return generateCookie(jwtRefreshCookie, refreshToken, "/api/v1/members/refreshtoken");
     }
 
     public String generateTokenFromUsername(String username) {
