@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
@@ -23,6 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtUtils {
     @Value("${jwt.expiration}")
     private int jwtExpirationMs;
+
+    @Value("${jwt.jwtRefreshExpirationMs}")
+    private int refreshExpirationMs;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -39,7 +39,7 @@ public class JwtUtils {
 
     public Cookie generateJwtCookie(String username) {
         String jwt = generateTokenFromUsername(username);
-        return generateCookie(jwtCookie, jwt, "/api", 1800);
+        return generateCookie(jwtCookie, jwt, "/api", 24 * 60 * 60 * 1000);
     }
 
     private Cookie generateCookie(String name, String value, String path, int Age) {
@@ -51,7 +51,7 @@ public class JwtUtils {
     }
 
     public Cookie generateRefreshJwtCookie(String refreshToken) {
-        return generateCookie(jwtRefreshCookie, refreshToken, "/api/v1/members/refreshtoken", 1209600);
+        return generateCookie(jwtRefreshCookie, refreshToken, "/api/v1/members/refreshtoken", refreshExpirationMs);
     }
 
     public String generateTokenFromUsername(String username) {
@@ -64,20 +64,8 @@ public class JwtUtils {
     }
 
     public boolean validateJwtToken(String authToken) {
-        try {
-            Jwts.parser().verifyWith(key()).build().parse(authToken);
-            return true;
-        } catch (MalformedJwtException e) {
-            log.error("Invalid JWT token: {}", e.getMessage());
-        } catch (ExpiredJwtException e) {
-            log.error("JWT token is expired: {}", e.getMessage());
-        } catch (UnsupportedJwtException e) {
-            log.error("JWT token is unsupported: {}", e.getMessage());
-        } catch (IllegalArgumentException e) {
-            log.error("JWT claims string is empty: {}", e.getMessage());
-        }
-
-        return false;
+        Jwts.parser().verifyWith(key()).build().parse(authToken);
+        return true;
     }
 
     public String getUserNameFromJwtToken(String token) {
