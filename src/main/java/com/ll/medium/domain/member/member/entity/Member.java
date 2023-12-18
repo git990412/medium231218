@@ -10,6 +10,7 @@ import com.ll.medium.global.jpa.entity.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToMany;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,5 +38,6 @@ public class Member extends BaseEntity {
     private String password;
 
     @Builder.Default
+    @ManyToMany
     private Set<Role> roles = new HashSet<>();
 }
