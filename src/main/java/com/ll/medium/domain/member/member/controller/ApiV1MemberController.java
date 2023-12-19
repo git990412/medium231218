@@ -74,4 +74,23 @@ public class ApiV1MemberController {
             return ResponseEntity.badRequest().body("아이디 또는 비밀번호가 일치하지 않습니다.");
         }
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        refreshTokenService.deleteByUserId(userDetails.getId());
+
+        ResponseCookie jwt = jwtUtils.getCleanJwtCookie();
+        ResponseCookie jwtRefresh = jwtUtils.getCleanJwtRefreshCookie();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwt.toString())
+                .header(HttpHeaders.SET_COOKIE, jwtRefresh.toString())
+                .build();
+    }
 }

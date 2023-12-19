@@ -93,15 +93,17 @@ public class JwtUtils {
         }
     }
 
-    public Cookie getCleanJwtCookie() {
-        Cookie cookie = new Cookie(jwtCookie, null);
-        cookie.setPath("/api");
-        return cookie;
+    public ResponseCookie getCleanJwtCookie() {
+        return ResponseCookie.from(jwtCookie, null)
+                .path("/api")
+                .maxAge(0)
+                .build();
     }
 
-    public Cookie getCleanJwtRefreshCookie() {
-        Cookie cookie = new Cookie(jwtRefreshCookie, null);
-        cookie.setPath("/api/v1/members/refreshtoken");
-        return cookie;
+    public ResponseCookie getCleanJwtRefreshCookie() {
+        return ResponseCookie.from(jwtRefreshCookie, null)
+                .path("/api/v1/members/refreshtoken")
+                .maxAge(0)
+                .build();
     }
 }
