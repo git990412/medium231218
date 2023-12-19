@@ -1,5 +1,7 @@
 package com.ll.medium.domain.member.member.controller;
 
+import java.util.HashMap;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -40,10 +42,12 @@ public class ApiV1MemberController {
     public ResponseEntity<?> join(@Valid @RequestBody JoinForm joinForm) {
         if (joinForm.getPassword().equals(joinForm.getPasswordConfirm())) {
             memberService.join(joinForm);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.created(null).build();
         }
 
-        return ResponseEntity.badRequest().body("비밀번호가 일치하지 않습니다.");
+        HashMap<String, String> error = new HashMap<>();
+        error.put("passwordConfirm", "비밀번호가 일치하지 않습니다.");
+        return ResponseEntity.badRequest().body(error);
     }
 
     @PreAuthorize("isAnonymous()")

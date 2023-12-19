@@ -34,6 +34,7 @@ const MediumNavbar = () => {
       className={"drop-shadow-md"}
     >
       <NavbarContent>
+        {/* 모바일 메뉴 토글버튼 */}
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           className="sm:hidden"
@@ -49,11 +50,12 @@ const MediumNavbar = () => {
           <Link href="/login">Login</Link>
         </NavbarItem>
         <NavbarItem>
-          <Button as={Link} color="warning" href="/signup" variant="flat">
+          <Button as={Link} href="/signup" variant="flat">
             Sign Up
           </Button>
         </NavbarItem>
       </NavbarContent>
+      {/* 모바일용 메뉴 */}
       <NavbarMenu>
         {menuItems.map((item, index) => (
           <NavbarMenuItem key={`${item}-${index}`}>
