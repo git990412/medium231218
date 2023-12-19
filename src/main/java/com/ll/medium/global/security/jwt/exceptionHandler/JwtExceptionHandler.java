@@ -1,7 +1,9 @@
 package com.ll.medium.global.security.jwt.exceptionHandler;
 
 import java.io.IOException;
+import java.time.Instant;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,6 +33,9 @@ public class JwtExceptionHandler {
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserDetailsServiceImpl userDetailsService;
 
+    @Value("${jwt.jwtRefreshExpirationMs}")
+    private Long refreshTokenDurationMs;
+
     @ExceptionHandler(ExpiredJwtException.class)
     public void handleExpiredJwtException(
             HttpServletRequest request,
@@ -39,7 +44,7 @@ public class JwtExceptionHandler {
         String token = jwtUtils.getJwtRefreshFromCookies(request);
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token).orElse(null);
 
-        if (refreshToken != null) {
+        if (refreshToken != null && refreshToken.getExpiryDate().isBefore(Instant.now())) {
             String username = refreshToken.getMember().getUsername();
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
@@ -53,9 +58,10 @@ public class JwtExceptionHandler {
             ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(username);
             response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
 
-            filterChain.doFilter(request, response);
-        } else {
-            response.sendError(401, "로그인이 필요합니다.");
+            refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
+            refreshTokenRepository.save(refreshToken);
         }
+
+        filterChain.doFilter(request, response);
     }
 }
