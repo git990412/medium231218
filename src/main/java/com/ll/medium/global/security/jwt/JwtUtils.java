@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 
@@ -35,20 +36,20 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
-    public Cookie generateJwtCookie(String username) {
+    public ResponseCookie generateJwtCookie(String username) {
         String jwt = generateTokenFromUsername(username);
         return generateCookie(jwtCookie, jwt, "/api");
     }
 
-    private Cookie generateCookie(String name, String value, String path) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setPath(path);
-        cookie.setMaxAge(1209600000);
-        cookie.setHttpOnly(true);
-        return cookie;
+    private ResponseCookie generateCookie(String name, String value, String path) {
+        return ResponseCookie.from(name, value)
+                .path(path)
+                .maxAge(1209600000)
+                .httpOnly(true)
+                .build();
     }
 
-    public Cookie generateRefreshJwtCookie(String refreshToken) {
+    public ResponseCookie generateRefreshJwtCookie(String refreshToken) {
         return generateCookie(jwtRefreshCookie, refreshToken, "/api/v1/members/refreshtoken");
     }
 
