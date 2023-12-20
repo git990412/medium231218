@@ -76,7 +76,7 @@ public class ApiV1MemberController {
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                     .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
-                    .body(MemberDto.builder().username(userDetails.getUsername()));
+                    .body(MemberDto.builder().username(userDetails.getUsername()).build());
         } catch (AuthenticationException e) {
             return ResponseEntity.badRequest().body(error);
         }
