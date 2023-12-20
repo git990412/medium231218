@@ -2,11 +2,15 @@
 import EmailInput from "@/components/EmailInput";
 import PasswordInput from "@/components/PasswordInput";
 import { instance } from "@/config/axiosConfig";
+import { login } from "@/store/userSlice";
 import { Button } from "@nextui-org/react";
 import { AxiosError } from "axios";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 
 const Page = () => {
+  const dispatch = useDispatch();
+
   const [loginForm, setLoginForm] = useState({
     email: "",
     password: "",
@@ -31,12 +35,15 @@ const Page = () => {
 
   const handleSubmit = () => {
     instance
-      .post("/login", loginForm)
+      .post("/members/login", loginForm)
       .then((res) => {
-        console.log(res);
+        console.log(res.data);
       })
       .catch((err: AxiosError) => {
-        console.log(err);
+        setErrors({
+          ...errors,
+          ...(err.response?.data as any),
+        });
       });
   };
 

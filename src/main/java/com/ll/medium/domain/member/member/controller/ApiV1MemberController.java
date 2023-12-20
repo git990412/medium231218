@@ -53,8 +53,11 @@ public class ApiV1MemberController {
     @PreAuthorize("isAnonymous()")
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginForm loginForm) {
+        HashMap<String, String> error = new HashMap<>();
+        error.put("password", "아이디 또는 비밀번호가 일치하지 않습니다.");
+
         if (!memberService.findByEmail(loginForm.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("아이디 또는 비밀번호가 일치하지 않습니다.");
+            return ResponseEntity.badRequest().body(error);
         }
 
         try {
@@ -75,7 +78,7 @@ public class ApiV1MemberController {
                     .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
                     .body(MemberDto.builder().username(userDetails.getUsername()));
         } catch (AuthenticationException e) {
-            return ResponseEntity.badRequest().body("아이디 또는 비밀번호가 일치하지 않습니다.");
+            return ResponseEntity.badRequest().body(error);
         }
     }
 
