@@ -2,11 +2,11 @@
 
 import { instance } from "@/config/axiosConfig";
 import { Button, Input } from "@nextui-org/react";
-import { ChangeEvent, useMemo, useState } from "react";
-import EmailInput from "./_components/EmailInput";
-import PasswordInput from "./_components/PasswordInput";
+import { ChangeEvent, useState } from "react";
+import EmailInput from "../../components/EmailInput";
+import PasswordInput from "../../components/PasswordInput";
 import { useRouter } from "next/navigation";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 
 const Page = () => {
   const router = useRouter();
