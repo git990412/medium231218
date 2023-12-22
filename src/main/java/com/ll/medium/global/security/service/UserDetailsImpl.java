@@ -11,16 +11,18 @@ import com.ll.medium.domain.member.member.entity.Member;
 import com.ll.medium.domain.member.role.entity.Role;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class UserDetailsImpl implements UserDetails {
     private static final long serialVersionUID = 1L;
 
-    private final Long id;
-    private final String username;
-    private final String password;
-    private final String email;
-    private final Set<Role> roles;
+    private Long id;
+    private String username;
+    private String password;
+    private String email;
+    private Set<Role> roles;
 
     public UserDetailsImpl(Member member) {
         this.id = member.getId();

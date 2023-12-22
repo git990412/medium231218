@@ -36,15 +36,15 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
-    public ResponseCookie generateJwtCookie(String username) {
-        String jwt = generateTokenFromUsername(username);
+    public ResponseCookie generateJwtCookie(String email) {
+        String jwt = generateTokenFromEmail(email);
         return generateCookie(jwtCookie, jwt, "/api");
     }
 
     private ResponseCookie generateCookie(String name, String value, String path) {
         return ResponseCookie.from(name, value)
                 .path(path)
-                .maxAge(1209600000)
+                .maxAge(14 * 24 * 60 * 60)
                 .httpOnly(true)
                 .build();
     }
@@ -53,7 +53,7 @@ public class JwtUtils {
         return generateCookie(jwtRefreshCookie, refreshToken, "/api/v1/members/refreshtoken");
     }
 
-    public String generateTokenFromUsername(String username) {
+    public String generateTokenFromEmail(String username) {
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())
@@ -67,7 +67,7 @@ public class JwtUtils {
         return true;
     }
 
-    public String getUserNameFromJwtToken(String token) {
+    public String getEmailFromJwtToken(String token) {
         return Jwts.parser()
                 .verifyWith(key())
                 .build()

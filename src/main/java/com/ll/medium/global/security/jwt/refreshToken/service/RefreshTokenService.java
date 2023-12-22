@@ -1,6 +1,7 @@
 package com.ll.medium.global.security.jwt.refreshToken.service;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,10 @@ public class RefreshTokenService {
                 .token(UUID.randomUUID().toString())
                 .expiryDate(Instant.now().plusMillis(refreshTokenDurationMs))
                 .build());
+    }
+
+    public Optional<RefreshToken> findByMemberId(Long memberId) {
+        return refreshTokenRepository.findByMemberId(memberId);
     }
 
     @Transactional

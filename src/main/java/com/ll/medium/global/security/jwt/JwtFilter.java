@@ -1,16 +1,22 @@
 package com.ll.medium.global.security.jwt;
 
 import java.io.IOException;
+import java.time.Instant;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.ll.medium.domain.member.member.entity.Member;
+import com.ll.medium.global.security.jwt.refreshToken.entity.RefreshToken;
+import com.ll.medium.global.security.jwt.refreshToken.repository.RefreshTokenRepository;
 import com.ll.medium.global.security.service.UserDetailsServiceImpl;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +27,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtUtils jwtUtils;
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
 
     @Override
     protected void doFilterInternal(
@@ -28,17 +36,30 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String jwt = parseJwt(request);
-        if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-            String username = jwtUtils.getUserNameFromJwtToken(jwt);
+        try {
+            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+                String email = jwtUtils.getEmailFromJwtToken(jwt);
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                setAuth(request, email);
+            }
+        } catch (ExpiredJwtException e) {
+            String refreshJwt = jwtUtils.getJwtRefreshFromCookies(request);
+            RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshJwt).orElseGet(() -> null);
+            if (refreshToken != null && refreshToken.getExpiryDate().isAfter(Instant.now())) {
+                Member member = refreshToken.getMember();
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities());
+                setAuth(request, member.getEmail());
 
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                ResponseCookie jwtToken = jwtUtils.generateJwtCookie(member.getEmail());
+                response.addHeader("Set-Cookie", jwtToken.toString());
+            } else {
+                ResponseCookie deleteJwtToken = jwtUtils.getCleanJwtCookie();
+                ResponseCookie deleteRefreshToken = jwtUtils.getCleanJwtRefreshCookie();
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                response.addHeader("Set-Cookie", deleteJwtToken.toString());
+                response.addHeader("Set-Cookie", deleteRefreshToken.toString());
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            }
         }
 
         filterChain.doFilter(request, response);
@@ -46,5 +67,16 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private String parseJwt(HttpServletRequest request) {
         return jwtUtils.getJwtFromCookies(request);
+    }
+
+    private void setAuth(HttpServletRequest request, String email) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
+
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

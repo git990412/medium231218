@@ -37,7 +37,7 @@ const Page = () => {
     instance
       .post("/members/login", loginForm)
       .then((res) => {
-        console.log(res.data);
+        dispatch(login(res.data));
       })
       .catch((err: AxiosError) => {
         setErrors({
