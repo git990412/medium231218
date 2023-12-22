@@ -36,6 +36,8 @@ public class Member extends BaseEntity {
     @Email
     private String email;
 
+    private boolean isPaid;
+
     private String password;
 
     @Builder.Default

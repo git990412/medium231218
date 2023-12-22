@@ -5,11 +5,13 @@ import { instance } from "@/config/axiosConfig";
 import { login } from "@/store/userSlice";
 import { Button } from "@nextui-org/react";
 import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 
 const Page = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const [loginForm, setLoginForm] = useState({
     email: "",
@@ -38,6 +40,7 @@ const Page = () => {
       .post("/members/login", loginForm)
       .then((res) => {
         dispatch(login(res.data));
+        router.push("/");
       })
       .catch((err: AxiosError) => {
         setErrors({
