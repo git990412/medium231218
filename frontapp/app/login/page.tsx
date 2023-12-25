@@ -1,6 +1,7 @@
 "use client";
 import EmailInput from "@/components/EmailInput";
 import PasswordInput from "@/components/PasswordInput";
+import PublicRoute from "@/components/PublicRoute";
 import { instance } from "@/config/axiosConfig";
 import { login } from "@/store/userSlice";
 import { Button } from "@nextui-org/react";
@@ -78,4 +79,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default PublicRoute(Page);

@@ -11,19 +11,24 @@ import {
   NavbarMenuItem,
 } from "@nextui-org/react";
 import Link from "next/link";
-import React from "react";
+import React, { use } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
 
 const MediumNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
 
   const menuItems = [
     {
       name: "Sign Up",
       href: "/signup",
+      permission: "anonymous",
     },
     {
       name: "Log in",
       href: "/login",
+      permission: "anonymous",
     },
   ];
 
@@ -46,30 +51,36 @@ const MediumNavbar = () => {
         </NavbarBrand>
       </NavbarContent>
       <NavbarContent justify="end">
-        <NavbarItem className="hidden lg:flex">
-          <Link href="/login">Login</Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Button as={Link} href="/signup" variant="flat">
-            Sign Up
-          </Button>
-        </NavbarItem>
+        {!isLoggedIn && (
+          <>
+            <NavbarItem className="hidden lg:flex">
+              <Link href="/login">Login</Link>
+            </NavbarItem>
+            <NavbarItem>
+              <Button as={Link} href="/signup" variant="flat">
+                Sign Up
+              </Button>
+            </NavbarItem>
+          </>
+        )}
       </NavbarContent>
       {/* 모바일용 메뉴 */}
       <NavbarMenu>
-        {menuItems.map((item, index) => (
-          <NavbarMenuItem key={`${item}-${index}`}>
-            <Link
-              className="w-full"
-              href={item.href}
-              onClick={() => {
-                setIsMenuOpen(false);
-              }}
-            >
-              {item.name}
-            </Link>
-          </NavbarMenuItem>
-        ))}
+        {menuItems
+          .filter((item) => !isLoggedIn || item.permission !== "anonymous")
+          .map((item, index) => (
+            <NavbarMenuItem key={`${item}-${index}`}>
+              <Link
+                className="w-full"
+                href={item.href}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                }}
+              >
+                {item.name}
+              </Link>
+            </NavbarMenuItem>
+          ))}
       </NavbarMenu>
     </Navbar>
   );
