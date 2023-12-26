@@ -40,7 +40,7 @@ const Page = () => {
     instance
       .post("/members/login", loginForm)
       .then((res) => {
-        dispatch(login(res.data));
+        dispatch(login((res.data as any).username));
         router.push("/");
       })
       .catch((err: AxiosError) => {

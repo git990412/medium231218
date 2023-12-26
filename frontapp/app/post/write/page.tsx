@@ -85,9 +85,9 @@ const Page = () => {
   );
 
   const onSubmit = () => {
-    instance.post("/post/write", post).then((res) => {
+    instance.post("/posts/write", post).then((res) => {
       alert("등록되었습니다.");
-      router.push("/post/list");
+      router.back();
     });
   };
 

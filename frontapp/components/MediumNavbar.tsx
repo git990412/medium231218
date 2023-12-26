@@ -34,6 +34,7 @@ const MediumNavbar = () => {
   };
 
   const menuItems = [
+    { name: "글 등록", href: "/post/write", permission: "auth" },
     { name: "Sign Up", href: "/signup", permission: "anonymous" },
     { name: "LogIn", href: "/login", permission: "anonymous" },
     { name: "Logout", href: "#", permission: "auth" },
