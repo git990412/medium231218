@@ -5,12 +5,14 @@ import { components } from "@/types/api/v1/schema";
 import { Divider, Button } from "@nextui-org/react";
 import DOMPurify from "dompurify";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import "react-quill/dist/quill.snow.css";
 import { useSelector } from "react-redux";
 
 const Page = ({ params }: { params: { index: string } }) => {
   const username = useSelector((state: RootState) => state.user.username);
+  const router = useRouter();
 
   useEffect(() => {
     instance.get(`/posts/${params.index}`).then((res) => {
@@ -19,12 +21,12 @@ const Page = ({ params }: { params: { index: string } }) => {
   }, []);
 
   const deletePost = () => {
-    instance.delete(`/post/${params.index}/delete`).then((res) => {
+    instance.delete(`/posts/${params.index}/delete`).then((res) => {
       const rsData = res.data;
 
       if (rsData.success) {
         alert("삭제되었습니다.");
-        window.location.href = "/";
+        router.replace("/");
       }
     });
   };
