@@ -15,6 +15,7 @@ import {
 import { useState, useMemo } from "react";
 import useSWR from "swr";
 import { components } from "@/types/api/v1/schema";
+import dateStringFormatter from "@/util/dateStringFormatter";
 
 // fetcher 함수의 타입을 정의합니다.
 const fetcher = (url: string) => instance.get(url).then((res) => res.data);
@@ -69,6 +70,11 @@ export default function Home() {
             {(columnKey) => {
               if (columnKey === "username") {
                 return <TableCell>{item.member?.username}</TableCell>;
+              }
+              if (columnKey === "createDate") {
+                return (
+                  <TableCell>{dateStringFormatter(item?.createDate)}</TableCell>
+                );
               }
               return <TableCell>{getKeyValue(item, columnKey)}</TableCell>;
             }}
