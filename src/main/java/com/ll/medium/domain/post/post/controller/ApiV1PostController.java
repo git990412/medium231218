@@ -1,26 +1,17 @@
 package com.ll.medium.domain.post.post.controller;
 
+import com.ll.medium.domain.post.post.dto.PostDto;
+import com.ll.medium.domain.post.post.entity.Post;
+import com.ll.medium.domain.post.post.form.WriteForm;
+import com.ll.medium.domain.post.post.service.PostService;
+import com.ll.medium.global.security.service.UserDetailsImpl;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.ll.medium.domain.post.post.dto.PostDto;
-import com.ll.medium.domain.post.post.form.WriteForm;
-import com.ll.medium.domain.post.post.service.PostService;
-import com.ll.medium.global.security.service.UserDetailsImpl;
-
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -48,10 +39,13 @@ public class ApiV1PostController {
 
     @GetMapping("/{id}")
     public ResponseEntity<PostDto> getOne(@PathVariable("id") long id) {
-        PostDto postDto = postService.getOne(id);
+        Post post = postService.getOne(id);
+        PostDto postDto = new PostDto(post);
 
-        if (postDto.isPaid() && !getUserDetails().isPaid()) {
-            postDto.setBody("이 글은 유료멤버십전용 입니다.");
+        if (!post.getMember().getId().equals(getUserDetails().getId())) {
+            if (postDto.isPaid() && !getUserDetails().isPaid()) {
+                postDto.setBody("이 글은 유료멤버십전용 입니다.");
+            }
         }
 
         return ResponseEntity.ok().body(postDto);
@@ -71,7 +65,7 @@ public class ApiV1PostController {
 
         Long MemberId = postService.getPostMemberId(id);
 
-        if (getUserDetails().getId() == MemberId) {
+        if (getUserDetails().getId().equals(MemberId)) {
             postService.updatePost(form, id);
             return ResponseEntity.ok().build();
         } else {
@@ -84,7 +78,7 @@ public class ApiV1PostController {
     public ResponseEntity<?> deletePost(@PathVariable("id") Long id) {
         Long MemberId = postService.getPostMemberId(id);
 
-        if (getUserDetails().getId() == MemberId) {
+        if (getUserDetails().getId().equals(MemberId)) {
             postService.deletePost(id);
             return ResponseEntity.ok().build();
         } else {
