@@ -16,11 +16,13 @@ import { useState, useMemo } from "react";
 import useSWR from "swr";
 import { components } from "@/types/api/v1/schema";
 import dateStringFormatter from "@/util/dateStringFormatter";
+import { useRouter } from "next/navigation";
 
 // fetcher 함수의 타입을 정의합니다.
 const fetcher = (url: string) => instance.get(url).then((res) => res.data);
 
 export default function Home() {
+  const router = useRouter();
   const [page, setPage] = useState<number>(1);
 
   const { data, isValidating: isLoading } = useSWR<
@@ -70,10 +72,20 @@ export default function Home() {
             {(columnKey) => {
               if (columnKey === "username") {
                 return <TableCell>{item.member?.username}</TableCell>;
-              }
-              if (columnKey === "createDate") {
+              } else if (columnKey === "createDate") {
                 return (
                   <TableCell>{dateStringFormatter(item?.createDate)}</TableCell>
+                );
+              } else if (columnKey === "title") {
+                return (
+                  <TableCell
+                    className="hover:cursor-pointer hover:text-blue-600"
+                    onClick={() => {
+                      router.push(`/post/${item.id}`);
+                    }}
+                  >
+                    {item.title}
+                  </TableCell>
                 );
               }
               return <TableCell>{getKeyValue(item, columnKey)}</TableCell>;
