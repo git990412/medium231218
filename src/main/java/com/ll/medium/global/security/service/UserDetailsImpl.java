@@ -22,6 +22,7 @@ public class UserDetailsImpl implements UserDetails {
     private String username;
     private String password;
     private String email;
+    private boolean isPaid;
     private Set<Role> roles;
 
     public UserDetailsImpl(Member member) {
@@ -30,6 +31,7 @@ public class UserDetailsImpl implements UserDetails {
         this.password = member.getPassword();
         this.email = member.getEmail();
         this.roles = member.getRoles();
+        this.isPaid = member.isPaid();
     }
 
     @Override

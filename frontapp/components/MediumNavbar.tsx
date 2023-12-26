@@ -35,6 +35,8 @@ const MediumNavbar = () => {
 
   const menuItems = [
     { name: "글 등록", href: "/post/write", permission: "auth" },
+    { name: "전체 글", href: "/post/list", permission: "all" },
+    { name: "나의 글", href: "/post/mylist", permission: "auth" },
     { name: "Sign Up", href: "/signup", permission: "anonymous" },
     { name: "LogIn", href: "/login", permission: "anonymous" },
     { name: "Logout", href: "#", permission: "auth" },
@@ -44,7 +46,8 @@ const MediumNavbar = () => {
   const filteredMenuItems = menuItems.filter(
     (item) =>
       (isLoggedIn && item.permission === "auth") ||
-      (!isLoggedIn && item.permission === "anonymous")
+      (!isLoggedIn && item.permission === "anonymous") ||
+      item.permission === "all"
   );
 
   // 메뉴 아이템 렌더링을 위한 컴포넌트
@@ -80,7 +83,7 @@ const MediumNavbar = () => {
           </Link>
         </NavbarBrand>
       </NavbarContent>
-      <NavbarContent justify="end">
+      <NavbarContent className="hidden sm:flex gap-4" justify="end">
         {filteredMenuItems.map((item, index) => (
           <MenuItem key={`${item.name}-${index}`} item={item} />
         ))}

@@ -26,25 +26,41 @@ import lombok.RequiredArgsConstructor;
 public class ApiV1PostController {
     private final PostService postService;
 
+    private UserDetailsImpl getUserDetails() {
+        return (UserDetailsImpl) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+    }
+
     @GetMapping("/list")
     public ResponseEntity<Page<PostDto>> getList(@RequestParam(value = "page", defaultValue = "0") int page) {
         return ResponseEntity.ok().body(postService.getList(page));
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/myList")
+    public ResponseEntity<Page<PostDto>> getMyList(@RequestParam(value = "page", defaultValue = "0") int page) {
+        return ResponseEntity.ok().body(postService.getMyList(page, getUserDetails().getId()));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PostDto> getOne(@PathVariable("id") long id) {
-        return ResponseEntity.ok().body(postService.getOne(id));
+        PostDto postDto = postService.getOne(id);
+
+        if (postDto.isPaid() && !getUserDetails().isPaid()) {
+            postDto.setBody("이 글은 유료멤버십전용 입니다.");
+        }
+
+        return ResponseEntity.ok().body(postDto);
     }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/write")
     public ResponseEntity<?> writePost(@Valid @RequestBody WriteForm form) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
-        postService.writePost(form, userDetails.getId());
+        postService.writePost(form, getUserDetails().getId());
 
         return ResponseEntity.created(null).build();
     }
+
 }
