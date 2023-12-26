@@ -12,12 +12,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/posts")
 public class ApiV1PostController {
     private final PostService postService;
+
+    String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/images/";
 
     private UserDetailsImpl getUserDetails() {
         return (UserDetailsImpl) SecurityContextHolder
@@ -84,5 +94,36 @@ public class ApiV1PostController {
         } else {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @PutMapping("{id}/hit")
+    public ResponseEntity<?> increaseHit(@PathVariable("id") Long id) {
+        postService.increaseHit(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/imageUpload")
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) throws IllegalStateException, IOException {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("fail: no image resource");
+        }
+
+        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        // 파일을 저장할 경로 설정
+        File destination = new File(uploadDir + fileName);
+
+        // 파일 저장
+        file.transferTo(destination);
+        
+        return ResponseEntity.ok().body("/api/v1/posts/getImage/" + fileName);
+    }
+
+    @GetMapping("/getImage/{fileName}")
+    public ResponseEntity<byte[]> getMethodName(@PathVariable("fileName") String fileName) throws IOException {
+        Path path = Paths.get(uploadDir + fileName);
+        byte[] image = Files.readAllBytes(path);
+
+        return ResponseEntity.ok().body(image);
     }
 }
