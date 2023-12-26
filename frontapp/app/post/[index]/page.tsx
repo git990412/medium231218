@@ -18,6 +18,8 @@ const Page = ({ params }: { params: { index: string } }) => {
     instance.get(`/posts/${params.index}`).then((res) => {
       setPost(res.data);
     });
+
+    instance.put(`/posts/${params.index}/hit`)
   }, []);
 
   const deletePost = () => {

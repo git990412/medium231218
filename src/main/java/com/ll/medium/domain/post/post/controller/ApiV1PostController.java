@@ -1,19 +1,5 @@
 package com.ll.medium.domain.post.post.controller;
 
-import com.ll.medium.domain.post.post.dto.PostDto;
-import com.ll.medium.domain.post.post.entity.Post;
-import com.ll.medium.domain.post.post.form.WriteForm;
-import com.ll.medium.domain.post.post.service.PostService;
-import com.ll.medium.global.security.service.UserDetailsImpl;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,11 +7,37 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.ll.medium.domain.post.like.service.LikeService;
+import com.ll.medium.domain.post.post.dto.PostDto;
+import com.ll.medium.domain.post.post.entity.Post;
+import com.ll.medium.domain.post.post.form.WriteForm;
+import com.ll.medium.domain.post.post.service.PostService;
+import com.ll.medium.global.security.service.UserDetailsImpl;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/posts")
 public class ApiV1PostController {
     private final PostService postService;
+    private final LikeService likeService;
 
     String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/images/";
 
@@ -104,7 +116,8 @@ public class ApiV1PostController {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/imageUpload")
-    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) throws IllegalStateException, IOException {
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file)
+            throws IllegalStateException, IOException {
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("fail: no image resource");
         }
@@ -115,7 +128,7 @@ public class ApiV1PostController {
 
         // 파일 저장
         file.transferTo(destination);
-        
+
         return ResponseEntity.ok().body("/api/v1/posts/getImage/" + fileName);
     }
 
@@ -126,4 +139,19 @@ public class ApiV1PostController {
 
         return ResponseEntity.ok().body(image);
     }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<?> doLike(@PathVariable("id") Long id) {
+        likeService.createLike(id, getUserDetails().getId());
+
+        return ResponseEntity.created(null).build();
+    }
+
+    @DeleteMapping("/{id}/cancelLike")
+    public ResponseEntity<?> cancelLike(@PathVariable("id") Long id) {
+        likeService.cancelLike(id, getUserDetails().getId());
+
+        return ResponseEntity.ok().build();
+    }
+
 }
