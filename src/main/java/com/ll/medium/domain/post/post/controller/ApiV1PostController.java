@@ -9,6 +9,9 @@ import com.ll.medium.global.rq.Rq.Rq;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +22,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,8 +37,15 @@ public class ApiV1PostController {
     String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/images/";
 
     @GetMapping("/list")
-    public ResponseEntity<Page<PostDto>> getList(@RequestParam(value = "page", defaultValue = "0") int page) {
-        return ResponseEntity.ok().body(postService.getList(page));
+    public ResponseEntity<Page<PostDto>> getList(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "sortCode", defaultValue = "") String sortCode,
+            @RequestParam(value = "kwType", defaultValue = "") String kwType,
+            @RequestParam(value = "kw", defaultValue = "") String kw) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("id"));
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
+        return ResponseEntity.ok().body(postService.findByKw(kwType, kw, pageable));
     }
 
     @PreAuthorize("isAuthenticated()")
