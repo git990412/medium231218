@@ -37,11 +37,25 @@ export default function PostTable(props: PostTableProps) {
     `${props.url ?? "posts/list"}?page=${page - 1}`,
   );
 
+  const [search, setSearch] = useState<{
+    kwType: string;
+    kw: string;
+  }>({
+    kwType: "",
+    kw: "",
+  });
+
   const { data, isValidating: isLoading } = useSWR<
     components["schemas"]["PagePostDto"]
-  >(url, fetcher, {
-    keepPreviousData: true,
-  });
+  >(
+    `${props.url ?? "posts/list"}?page=${page - 1}&kwType=${search.kwType}&kw=${
+      search.kw
+    }`,
+    fetcher,
+    {
+      keepPreviousData: true,
+    },
+  );
 
   const pages = useMemo(() => {
     return props.page ?? data?.totalPages ?? 0;
@@ -65,7 +79,9 @@ export default function PostTable(props: PostTableProps) {
                 color="primary"
                 page={page}
                 total={pages}
-                onChange={(page) => setPage(page)}
+                onChange={(page) => {
+                  setPage(page);
+                }}
               />
             </div>
           )
@@ -118,15 +134,12 @@ export default function PostTable(props: PostTableProps) {
           const formData = new FormData(e.target as HTMLFormElement);
           const searchType = formData.get("searchType") as string;
           const searchKeyword = formData.get("searchKeyword") as string;
-          setUrl(
-            `posts/list?page=${
-              page - 1
-            }&kwType=${searchType}&kw=${searchKeyword}`,
-          );
+          setSearch({ kwType: searchType, kw: searchKeyword });
         }}
         className={"w-3/4 flex"}
       >
         <Select
+          aria-label={"검색 타입"}
           variant={"underlined"}
           className={"w-2/5"}
           size={"sm"}
