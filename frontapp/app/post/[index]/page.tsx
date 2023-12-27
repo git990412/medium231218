@@ -2,7 +2,7 @@
 import { instance } from "@/config/axiosConfig";
 import { RootState } from "@/store/store";
 import { components } from "@/types/api/v1/schema";
-import { Divider, Button } from "@nextui-org/react";
+import { Badge, Button, Divider, Textarea } from "@nextui-org/react";
 import DOMPurify from "dompurify";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,7 +19,7 @@ const Page = ({ params }: { params: { index: string } }) => {
       setPost(res.data);
     });
 
-    instance.put(`/posts/${params.index}/hit`)
+    instance.put(`/posts/${params.index}/hit`);
   }, []);
 
   const deletePost = () => {
@@ -33,14 +33,49 @@ const Page = ({ params }: { params: { index: string } }) => {
     });
   };
 
+  const addLike = () => {
+    instance
+      .post(`/posts/${params.index}/like`)
+      .then((res) => {
+        alert("추천되었습니다.");
+      })
+      .catch(() => {
+        const result = confirm("이미 추천하셨습니다. 추천을 취소하시겠습니까?");
+        if (result) {
+          instance.delete(`/posts/${params.index}/cancelLike`).then((res) => {
+            alert("추천이 취소되었습니다.");
+          });
+        }
+      });
+  };
+
   const [post, setPost] = useState<components["schemas"]["PostDto"]>({});
 
   return (
-    <div>
-      <h1 className="font-bold text-2xl">{post.title}</h1>
+    <div className="mt-10">
+      <div className="flex justify-between items-center">
+        <h1 className="font-bold text-2xl">{post.title}</h1>
+        {username === post.member?.username ? (
+          <div className="flex">
+            <Link
+              href={`/post/${post.id}/modify`}
+              className="hover:cursor-pointer hover:text-blue-600"
+            >
+              수정
+            </Link>
+            <div className="px-2">|</div>
+            <div
+              onClick={deletePost}
+              className="hover:cursor-pointer hover:text-blue-600"
+            >
+              삭제
+            </div>
+          </div>
+        ) : null}
+      </div>
       <Divider className="mt-2" />
       <div className="ql-snow">
-        <div className="ql-editor">
+        <div className="ql-editor !p-0 !py-5">
           <div
             dangerouslySetInnerHTML={{
               __html: DOMPurify.sanitize(String(post?.body)),
@@ -48,26 +83,21 @@ const Page = ({ params }: { params: { index: string } }) => {
           ></div>
         </div>
       </div>
-
-      {username === post.member?.username ? (
-        <>
-          <Button
-            className="mt-2 float-right"
-            as={Link}
-            href={`/post/${post.id}/modify`}
-            color="primary"
-          >
-            수정
-          </Button>
-          <Button
-            className="mt-2 mr-2 float-right"
-            onClick={deletePost}
-            color="primary"
-          >
-            삭제
-          </Button>
-        </>
-      ) : null}
+      <div className={"flex justify-center"}>
+        <Badge content={post.likes ?? 0} color={"primary"}>
+          <Button onClick={addLike}>추천</Button>
+        </Badge>
+      </div>
+      <Divider className={"mt-2"} />
+      <Textarea
+        variant="faded"
+        label="댓글"
+        placeholder="내용을 입력해주세요."
+        className="w-full mt-5"
+      />
+      <Button className="w-full mt-2" color={"primary"}>
+        등록
+      </Button>
     </div>
   );
 };

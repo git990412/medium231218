@@ -21,7 +21,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <NextUiProviders>
           <MediumNavbar />
-          {children}
+          <div className="sm:w-3/5 mx-auto">{children}</div>
         </NextUiProviders>
       </body>
     </html>

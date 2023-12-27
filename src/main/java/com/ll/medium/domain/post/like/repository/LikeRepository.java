@@ -1,15 +1,14 @@
 package com.ll.medium.domain.post.like.repository;
 
-import java.util.Optional;
-
+import com.ll.medium.domain.member.member.entity.Member;
+import com.ll.medium.domain.post.like.entity.PostLike;
+import com.ll.medium.domain.post.post.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.ll.medium.domain.member.member.entity.Member;
-import com.ll.medium.domain.post.like.entity.Like;
-import com.ll.medium.domain.post.post.entity.Post;
+import java.util.Optional;
 
-public interface LikeRepository extends JpaRepository<Like, Long> {
+public interface LikeRepository extends JpaRepository<PostLike, Long> {
 
-    Optional<Like> findByMemberAndPost(Member member, Post post);
+    Optional<PostLike> findByMemberAndPost(Member member, Post post);
 
 }

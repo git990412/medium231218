@@ -5,6 +5,21 @@
 
 
 export interface paths {
+  "/api/v1/posts/{id}/modify": {
+    put: operations["putMethodName"];
+  };
+  "/api/v1/posts/{id}/hit": {
+    put: operations["increaseHit"];
+  };
+  "/api/v1/posts/{id}/like": {
+    post: operations["doLike"];
+  };
+  "/api/v1/posts/write": {
+    post: operations["writePost"];
+  };
+  "/api/v1/posts/imageUpload": {
+    post: operations["uploadImage"];
+  };
   "/api/v1/members": {
     post: operations["join"];
   };
@@ -14,11 +29,26 @@ export interface paths {
   "/api/v1/members/login": {
     post: operations["login"];
   };
-  "/api/v1/posts": {
-    get: operations["getLatest"];
+  "/api/v1/posts/{id}": {
+    get: operations["getOne"];
+  };
+  "/api/v1/posts/myList": {
+    get: operations["getMyList"];
+  };
+  "/api/v1/posts/list": {
+    get: operations["getList"];
+  };
+  "/api/v1/posts/getImage/{fileName}": {
+    get: operations["getMethodName"];
   };
   "/api/v1/members/test": {
     get: operations["test"];
+  };
+  "/api/v1/posts/{id}/delete": {
+    delete: operations["deletePost"];
+  };
+  "/api/v1/posts/{id}/cancelLike": {
+    delete: operations["cancelLike"];
   };
 }
 
@@ -26,6 +56,11 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    WriteForm: {
+      title: string;
+      body: string;
+      published?: boolean;
+    };
     JoinForm: {
       username: string;
       password: string;
@@ -40,35 +75,6 @@ export interface components {
       username?: string;
       paid?: boolean;
     };
-    PagePostDto: {
-      /** Format: int32 */
-      totalPages?: number;
-      /** Format: int64 */
-      totalElements?: number;
-      pageable?: components["schemas"]["PageableObject"];
-      /** Format: int32 */
-      size?: number;
-      content?: components["schemas"]["PostDto"][];
-      /** Format: int32 */
-      number?: number;
-      sort?: components["schemas"]["SortObject"];
-      first?: boolean;
-      last?: boolean;
-      /** Format: int32 */
-      numberOfElements?: number;
-      empty?: boolean;
-    };
-    PageableObject: {
-      /** Format: int32 */
-      pageSize?: number;
-      /** Format: int32 */
-      pageNumber?: number;
-      unpaged?: boolean;
-      paged?: boolean;
-      /** Format: int64 */
-      offset?: number;
-      sort?: components["schemas"]["SortObject"];
-    };
     PostDto: {
       /** Format: int64 */
       id?: number;
@@ -81,13 +87,44 @@ export interface components {
       /** Format: int64 */
       hit?: number;
       member?: components["schemas"]["MemberDto"];
+      /** Format: int32 */
+      likes?: number;
       paid?: boolean;
       published?: boolean;
     };
+    PagePostDto: {
+      /** Format: int32 */
+      totalPages?: number;
+      /** Format: int64 */
+      totalElements?: number;
+      first?: boolean;
+      last?: boolean;
+      /** Format: int32 */
+      size?: number;
+      content?: components["schemas"]["PostDto"][];
+      /** Format: int32 */
+      number?: number;
+      sort?: components["schemas"]["SortObject"];
+      /** Format: int32 */
+      numberOfElements?: number;
+      pageable?: components["schemas"]["PageableObject"];
+      empty?: boolean;
+    };
+    PageableObject: {
+      /** Format: int64 */
+      offset?: number;
+      sort?: components["schemas"]["SortObject"];
+      /** Format: int32 */
+      pageNumber?: number;
+      /** Format: int32 */
+      pageSize?: number;
+      unpaged?: boolean;
+      paged?: boolean;
+    };
     SortObject: {
+      empty?: boolean;
       sorted?: boolean;
       unsorted?: boolean;
-      empty?: boolean;
     };
   };
   responses: never;
@@ -103,6 +140,89 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  putMethodName: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WriteForm"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "*/*": Record<string, never>;
+        };
+      };
+    };
+  };
+  increaseHit: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "*/*": Record<string, never>;
+        };
+      };
+    };
+  };
+  doLike: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "*/*": Record<string, never>;
+        };
+      };
+    };
+  };
+  writePost: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WriteForm"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "*/*": Record<string, never>;
+        };
+      };
+    };
+  };
+  uploadImage: {
+    requestBody?: {
+      content: {
+        "application/json": {
+          /** Format: binary */
+          file: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "*/*": Record<string, never>;
+        };
+      };
+    };
+  };
   join: {
     requestBody: {
       content: {
@@ -143,12 +263,62 @@ export interface operations {
       };
     };
   };
-  getLatest: {
+  getOne: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PostDto"];
+        };
+      };
+    };
+  };
+  getMyList: {
+    parameters: {
+      query?: {
+        page?: number;
+      };
+    };
     responses: {
       /** @description OK */
       200: {
         content: {
           "*/*": components["schemas"]["PagePostDto"];
+        };
+      };
+    };
+  };
+  getList: {
+    parameters: {
+      query?: {
+        page?: number;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagePostDto"];
+        };
+      };
+    };
+  };
+  getMethodName: {
+    parameters: {
+      path: {
+        fileName: string;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "*/*": string[];
         };
       };
     };
@@ -159,6 +329,36 @@ export interface operations {
       200: {
         content: {
           "*/*": string;
+        };
+      };
+    };
+  };
+  deletePost: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "*/*": Record<string, never>;
+        };
+      };
+    };
+  };
+  cancelLike: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "*/*": Record<string, never>;
         };
       };
     };

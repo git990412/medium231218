@@ -1,7 +1,7 @@
 "use client";
 import { instance } from "@/config/axiosConfig";
 import {
-  Button,
+  getKeyValue,
   Pagination,
   Spinner,
   Table,
@@ -10,9 +10,8 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
-  getKeyValue,
 } from "@nextui-org/react";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import useSWR from "swr";
 import { components } from "@/types/api/v1/schema";
 import dateStringFormatter from "@/util/dateStringFormatter";
@@ -24,6 +23,7 @@ const fetcher = (url: string) => instance.get(url).then((res) => res.data);
 interface PostTableProps {
   page?: number;
   url?: string;
+  className?: string;
 }
 
 export default function PostTable(props: PostTableProps) {
@@ -46,6 +46,7 @@ export default function PostTable(props: PostTableProps) {
   return (
     <Table
       aria-label="Example table with client async pagination"
+      className={props.className}
       bottomContent={
         pages > 0 && (
           <div className="flex w-full justify-center">
@@ -66,6 +67,7 @@ export default function PostTable(props: PostTableProps) {
         <TableColumn key="title">제목</TableColumn>
         <TableColumn key="createDate">작성일</TableColumn>
         <TableColumn key="username">작성자</TableColumn>
+        <TableColumn key="hit">조회수</TableColumn>
       </TableHeader>
       <TableBody
         items={data?.content ?? []}
