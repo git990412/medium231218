@@ -1,6 +1,7 @@
 package com.ll.medium.domain.post.post.entity;
 
 import com.ll.medium.domain.member.member.entity.Member;
+import com.ll.medium.domain.post.comment.entity.PostComment;
 import com.ll.medium.domain.post.like.entity.PostLike;
 import com.ll.medium.global.jpa.entity.BaseEntity;
 import jakarta.persistence.Entity;
@@ -33,4 +34,7 @@ public class Post extends BaseEntity {
 
     @OneToMany(mappedBy = "post")
     private List<PostLike> likes;
+
+    @OneToMany(mappedBy = "post")
+    private List<PostComment> comments;
 }

@@ -1,11 +1,13 @@
 package com.ll.medium.domain.post.post.dto;
 
 import com.ll.medium.domain.member.member.dto.MemberDto;
+import com.ll.medium.domain.post.comment.dto.PostCommentDto;
 import com.ll.medium.domain.post.post.entity.Post;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,6 +22,7 @@ public class PostDto {
     private Long hit;
     private MemberDto member;
     private int likes;
+    private List<PostCommentDto> comments;
 
     public PostDto(Post post) {
         this.id = post.getId();
@@ -32,5 +35,6 @@ public class PostDto {
         this.member = new MemberDto(post.getMember());
         this.isPaid = post.isPaid();
         this.likes = post.getLikes().size();
+        this.comments = post.getComments().stream().map(PostCommentDto::new).toList();
     }
 }

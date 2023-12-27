@@ -11,6 +11,9 @@ export interface paths {
   "/api/v1/posts/{id}/hit": {
     put: operations["increaseHit"];
   };
+  "/api/v1/posts/{postId}/comments/write": {
+    post: operations["write"];
+  };
   "/api/v1/posts/{id}/like": {
     post: operations["doLike"];
   };
@@ -75,6 +78,16 @@ export interface components {
       username?: string;
       paid?: boolean;
     };
+    PostCommentDto: {
+      /** Format: int64 */
+      id?: number;
+      username?: string;
+      body?: string;
+      /** Format: date-time */
+      createDate?: string;
+      /** Format: date-time */
+      modifyDate?: string;
+    };
     PostDto: {
       /** Format: int64 */
       id?: number;
@@ -89,22 +102,23 @@ export interface components {
       member?: components["schemas"]["MemberDto"];
       /** Format: int32 */
       likes?: number;
+      comments?: components["schemas"]["PostCommentDto"][];
       paid?: boolean;
       published?: boolean;
     };
     PagePostDto: {
-      /** Format: int32 */
-      totalPages?: number;
       /** Format: int64 */
       totalElements?: number;
-      first?: boolean;
-      last?: boolean;
+      /** Format: int32 */
+      totalPages?: number;
       /** Format: int32 */
       size?: number;
       content?: components["schemas"]["PostDto"][];
       /** Format: int32 */
       number?: number;
       sort?: components["schemas"]["SortObject"];
+      first?: boolean;
+      last?: boolean;
       /** Format: int32 */
       numberOfElements?: number;
       pageable?: components["schemas"]["PageableObject"];
@@ -114,12 +128,12 @@ export interface components {
       /** Format: int64 */
       offset?: number;
       sort?: components["schemas"]["SortObject"];
+      paged?: boolean;
+      unpaged?: boolean;
       /** Format: int32 */
       pageNumber?: number;
       /** Format: int32 */
       pageSize?: number;
-      unpaged?: boolean;
-      paged?: boolean;
     };
     SortObject: {
       empty?: boolean;
@@ -164,6 +178,28 @@ export interface operations {
     parameters: {
       path: {
         id: number;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "*/*": Record<string, never>;
+        };
+      };
+    };
+  };
+  write: {
+    parameters: {
+      path: {
+        postId: number;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          [key: string]: string;
+        };
       };
     };
     responses: {
