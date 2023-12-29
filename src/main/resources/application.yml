@@ -9,7 +9,8 @@ spring:
       max-file-size: 20MB
       max-request-size: 20MB
   profiles:
-    include: secret
+    include:
+      - secret
   threads:
     virtual:
       enabled: true

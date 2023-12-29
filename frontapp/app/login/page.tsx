@@ -51,6 +51,10 @@ const Page = () => {
       });
   };
 
+  const naverLogin = () => {
+    window.location.href = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_NAVER_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_NAVER_CALLBACK_URL}&state=test`;
+  };
+
   return (
     <div className="flex justify-center">
       <div className="w-3/4 max-w-sm flex flex-col items-center">
@@ -73,6 +77,13 @@ const Page = () => {
         />
         <Button className="w-full mt-2" onClick={handleSubmit}>
           로그인
+        </Button>
+        <Button
+          className={"w-full mt-2"}
+          color={"success"}
+          onClick={naverLogin}
+        >
+          네이버로그인
         </Button>
       </div>
     </div>

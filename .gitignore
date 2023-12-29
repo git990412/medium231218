@@ -39,3 +39,4 @@ medium.mv.db
 medium.trace.db
 /medium.lock.db
 /src/main/resources/static/
+/src/main/resources/application-naver.yml
