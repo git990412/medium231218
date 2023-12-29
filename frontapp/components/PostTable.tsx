@@ -33,14 +33,13 @@ interface PostTableProps {
 export default function PostTable(props: PostTableProps) {
   const router = useRouter();
   const [page, setPage] = useState<number>(1);
-  const [url, setUrl] = useState<string>(
-    `${props.url ?? "posts/list"}?page=${page - 1}`,
-  );
 
   const [search, setSearch] = useState<{
+    sortCode: string;
     kwType: string;
     kw: string;
   }>({
+    sortCode: "idDesc",
     kwType: "",
     kw: "",
   });
@@ -48,9 +47,9 @@ export default function PostTable(props: PostTableProps) {
   const { data, isValidating: isLoading } = useSWR<
     components["schemas"]["PagePostDto"]
   >(
-    `${props.url ?? "posts/list"}?page=${page - 1}&kwType=${search.kwType}&kw=${
-      search.kw
-    }`,
+    `${props.url ?? "posts/list"}?page=${page - 1}&sortCode=${
+      search.sortCode
+    }&kwType=${search.kwType}&kw=${search.kw}`,
     fetcher,
     {
       keepPreviousData: true,
@@ -66,9 +65,29 @@ export default function PostTable(props: PostTableProps) {
 
   return (
     <>
+      <div className={props.className + " flex w-full"}>
+        <div className={"flex w-2/5"}>
+          <Select
+            variant={"underlined"}
+            defaultSelectedKeys={["idDesc"]}
+            label={"보기"}
+            labelPlacement={"outside-left"}
+            value={search.sortCode}
+            onChange={(e) => {
+              setSearch({ ...search, sortCode: e.target.value });
+            }}
+            classNames={{ label: "w-12", base: "flex items-center" }}
+          >
+            <SelectItem key={"idDesc"}>id최신순</SelectItem>
+            <SelectItem key={"idAsc"}>id오래된순</SelectItem>
+            <SelectItem key={"hitDesc"}>조회수높은순</SelectItem>
+            <SelectItem key={"likeCountAsc"}>추천수낮은순</SelectItem>
+          </Select>
+        </div>
+      </div>
       <Table
         aria-label="Example table with client async pagination"
-        className={props.className}
+        className={"mt-2"}
         bottomContent={
           pages > 0 && (
             <div className="flex w-full justify-center">
@@ -132,9 +151,9 @@ export default function PostTable(props: PostTableProps) {
         onSubmit={(e) => {
           e.preventDefault();
           const formData = new FormData(e.target as HTMLFormElement);
-          const searchType = formData.get("searchType") as string;
+          const searchType = formData.getAll("searchType").join(",");
           const searchKeyword = formData.get("searchKeyword") as string;
-          setSearch({ kwType: searchType, kw: searchKeyword });
+          setSearch({ ...search, kwType: searchType, kw: searchKeyword });
         }}
         className={"w-3/4 flex"}
       >
@@ -142,13 +161,20 @@ export default function PostTable(props: PostTableProps) {
           aria-label={"검색 타입"}
           variant={"underlined"}
           className={"w-2/5"}
+          selectionMode={"multiple"}
           size={"sm"}
           name={"searchType"}
           defaultSelectedKeys={["title"]}
         >
-          <SelectItem key={"title"}>제목</SelectItem>
-          <SelectItem key={"body"}>내용</SelectItem>
-          <SelectItem key={"title,body"}>제목,내용</SelectItem>
+          <SelectItem classNames={{ title: "text-xs" }} key={"title"}>
+            제목
+          </SelectItem>
+          <SelectItem classNames={{ title: "text-xs" }} key={"body"}>
+            내용
+          </SelectItem>
+          <SelectItem classNames={{ title: "text-xs" }} key={"author"}>
+            닉네임
+          </SelectItem>
         </Select>
         <Spacer />
         <Input

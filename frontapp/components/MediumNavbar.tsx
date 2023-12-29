@@ -2,13 +2,11 @@
 
 import {
   Navbar,
-  NavbarContent,
-  NavbarMenuToggle,
   NavbarBrand,
-  NavbarItem,
-  Button,
+  NavbarContent,
   NavbarMenu,
   NavbarMenuItem,
+  NavbarMenuToggle,
 } from "@nextui-org/react";
 import Link from "next/link";
 import React from "react";
@@ -17,6 +15,7 @@ import { RootState } from "../store/store";
 import { instance } from "@/config/axiosConfig";
 import { useRouter } from "next/navigation";
 import { logout } from "@/store/userSlice";
+import { AxiosError } from "axios";
 
 const MediumNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -26,11 +25,18 @@ const MediumNavbar = () => {
 
   const logoutF = () => {
     // 로그아웃 로직
-    instance.post("/members/logout").then(() => {
-      dispatch(logout());
-      alert("로그아웃 되었습니다.");
-      router.replace("/");
-    });
+    instance
+      .post("/members/logout")
+      .then(() => {
+        dispatch(logout());
+        alert("로그아웃 되었습니다.");
+        router.replace("/");
+      })
+      .catch((err: AxiosError) => {
+        dispatch(logout());
+        alert("로그아웃 되었습니다.");
+        router.replace("/");
+      });
   };
 
   const menuItems = [
@@ -47,7 +53,7 @@ const MediumNavbar = () => {
     (item) =>
       (isLoggedIn && item.permission === "auth") ||
       (!isLoggedIn && item.permission === "anonymous") ||
-      item.permission === "all"
+      item.permission === "all",
   );
 
   // 메뉴 아이템 렌더링을 위한 컴포넌트

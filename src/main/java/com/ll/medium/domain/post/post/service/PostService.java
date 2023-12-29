@@ -29,8 +29,8 @@ public class PostService {
         return postRepository.findByIsPublishedTrueOrderByIdDesc(pageable).map(PostDto::new);
     }
 
-    public Page<PostDto> findByKw(String kwType, String kw, Pageable pageable) {
-        return postRepository.findByKw(kwType, kw, pageable).map(PostDto::new);
+    public Page<PostDto> findByKw(String kwType, String kw, String sortCode, Pageable pageable) {
+        return postRepository.findByKw(kwType, kw, sortCode, pageable).map(PostDto::new);
     }
 
     public Page<PostDto> getMyList(int page, long userId) {
